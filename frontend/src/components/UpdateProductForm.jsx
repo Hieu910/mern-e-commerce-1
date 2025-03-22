@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { PlusCircle, Upload, Loader } from "lucide-react";
+import { PlusCircle, Upload, Loader, X } from "lucide-react";
 import { useProductStore } from "../stores/useProductStore";
-import { toast } from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 
 const categories = [
   "jeans",
@@ -14,20 +13,20 @@ const categories = [
   "bags",
 ];
 
-const UpdateProductForm = ({ product, onClose }) => {
+const UpdateProductForm = ({ selectedProduct, onClose }) => {
   const { updateProduct } = useProductStore();
-  const [newProduct, setNewProduct] = useState(product);
+  const [product, setProduct] = useState(selectedProduct);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setNewProduct(product);
-  }, [product]);
+    setProduct(selectedProduct);
+  }, [selectedProduct]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await updateProduct(newProduct._id, newProduct);
+      await updateProduct(product._id, product);
       toast.success("Product updated successfully");
       onClose();
     } catch (error) {
@@ -42,22 +41,27 @@ const UpdateProductForm = ({ product, onClose }) => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setNewProduct({ ...newProduct, image: reader.result });
+        setProduct({ ...product, image: reader.result });
       };
       reader.readAsDataURL(file);
     }
   };
 
   return (
-    <dialog id="update_modal" className="modal">
-      <div className="modal-box">
-        <h3 className="font-bold text-lg">Update Product</h3>
-        <p className="py-4">Press ESC key or click outside to close</p>
-        <form
-          method="dialog"
-          onSubmit={handleSubmit}
-          className="space-y-4 modal-backdrop"
+    <dialog
+      id="update_modal"
+      className="modal z-10 rounded-lg max-w-full bg-gray-800  w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl"
+    >
+      <Toaster />
+      <div className="modal-box relative  text-white rounded-lg shadow-lg p-4  max-h-screen overflow-y-auto">
+        <h3 className="font-bold text-lg mb-4">Update Product</h3>
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-gray-400 hover:text-gray-200"
         >
+          <X size={24} />
+        </button>
+        <form method="dialog" onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="name"
@@ -69,13 +73,11 @@ const UpdateProductForm = ({ product, onClose }) => {
               type="text"
               id="name"
               name="name"
-              value={newProduct.name}
-              onChange={(e) =>
-                setNewProduct({ ...newProduct, name: e.target.value })
-              }
+              value={product?.name}
+              onChange={(e) => setProduct({ ...product, name: e.target.value })}
               className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2
-                         px-3 text-white focus:outline-none focus:ring-2
-                        focus:ring-emerald-500 focus:border-emerald-500"
+                       px-3 text-white focus:outline-none focus:ring-2
+                      focus:ring-emerald-500 focus:border-emerald-500"
               required
             />
           </div>
@@ -90,14 +92,14 @@ const UpdateProductForm = ({ product, onClose }) => {
             <textarea
               id="description"
               name="description"
-              value={newProduct.description}
+              value={product?.description}
               onChange={(e) =>
-                setNewProduct({ ...newProduct, description: e.target.value })
+                setProduct({ ...product, description: e.target.value })
               }
               rows="3"
               className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm
-                         py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 
-                         focus:border-emerald-500"
+                       py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 
+                       focus:border-emerald-500"
               required
             />
           </div>
@@ -113,14 +115,14 @@ const UpdateProductForm = ({ product, onClose }) => {
               type="number"
               id="price"
               name="price"
-              value={newProduct.price}
+              value={product?.price}
               onChange={(e) =>
-                setNewProduct({ ...newProduct, price: e.target.value })
+                setProduct({ ...product, price: e.target.value })
               }
               step="0.01"
               className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm 
-                        py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500
-                         focus:border-emerald-500"
+                      py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500
+                       focus:border-emerald-500"
               required
             />
           </div>
@@ -135,13 +137,13 @@ const UpdateProductForm = ({ product, onClose }) => {
             <select
               id="category"
               name="category"
-              value={newProduct.category}
+              value={product?.category}
               onChange={(e) =>
-                setNewProduct({ ...newProduct, category: e.target.value })
+                setProduct({ ...product, category: e.target.value })
               }
               className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md
-                         shadow-sm py-2 px-3 text-white focus:outline-none 
-                         focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                       shadow-sm py-2 px-3 text-white focus:outline-none 
+                       focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               required
             >
               <option value="">Select a category</option>
@@ -168,26 +170,26 @@ const UpdateProductForm = ({ product, onClose }) => {
               <Upload className="h-5 w-5 inline-block mr-2" />
               Upload Image
             </label>
-            {newProduct.image && (
+            {product?.image && (
               <span className="ml-3 text-sm text-gray-400">
                 Image uploaded{" "}
               </span>
             )}
           </div>
-          {newProduct.image && (
-            <div className="flex justify-center">
+          {product?.image && (
+            <div className="flex justify-center mt-4">
               <img
-                src={newProduct.image}
+                src={product?.image}
                 alt="Profile"
-                className="size-32 rounded-md object-cover border-4 "
+                className="w-32 h-32 rounded-md object-cover border-4 border-gray-600"
               />
             </div>
           )}
           <button
             type="submit"
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md 
-                    shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 
-                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50"
+                  shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 
+                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50"
             disabled={loading}
           >
             {loading ? (

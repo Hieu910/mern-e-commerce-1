@@ -7,7 +7,7 @@ import UpdateProductForm from "./UpdateProductForm";
 const ProductsList = () => {
   const { deleteProduct, toggleFeaturedProduct, products } = useProductStore();
   const [selectedProduct, setSelectedProduct] = useState(null);
-  console.log("products", products);
+  console.log("products", selectedProduct);
 
   return (
     <>
@@ -116,12 +116,14 @@ const ProductsList = () => {
             ))}
           </tbody>
         </table>
-        {selectedProduct && (
-          <UpdateProductForm
-            product={selectedProduct}
-            onClose={() => setSelectedProduct(null)}
-          />
-        )}
+
+        <UpdateProductForm
+          selectedProduct={selectedProduct}
+          onClose={() => {
+            setSelectedProduct(null);
+            document.getElementById("update_modal").close();
+          }}
+        />
       </motion.div>
     </>
   );
