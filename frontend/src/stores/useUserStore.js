@@ -51,17 +51,23 @@ export const useUserStore = create((set, get) => ({
     set({ checkingAuth: true });
     try {
       const response = await axios.get("/auth/profile");
-      set({ user: response.data, checkingAuth: false });
+
+      set({ user: response.data });
     } catch (error) {
       console.log(error.message);
-      set({ checkingAuth: false, user: null });
+      set({ user: null });
+    } finally {
+      console.log("Finally block executed");
+      set({ checkingAuth: false });
     }
   },
 
   refreshToken: async () => {
+    if (get().checkingAuth) return;
     set({ checkingAuth: true });
     try {
       const response = await axios.post("/auth/refresh-token");
+      console.log(response);
       set({ checkingAuth: false });
       return response.data;
     } catch (error) {
@@ -97,6 +103,7 @@ axios.interceptors.response.use(
 
         return axios(originalRequest);
       } catch (refreshError) {
+        console.log(refreshError);
         // If refresh fails, redirect to login or handle as needed
         useUserStore.getState().logout();
         return Promise.reject(refreshError);

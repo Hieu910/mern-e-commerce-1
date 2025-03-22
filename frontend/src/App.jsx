@@ -18,11 +18,10 @@ import PurchaseCancelPage from "./pages/PurchaseCancelPage";
 
 function App() {
   const { user, checkAuth, checkingAuth } = useUserStore();
- 
+
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
-
 
 
   if (checkingAuth) return <LoadingSpinner />;
